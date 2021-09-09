@@ -29,7 +29,7 @@ if (isset($_POST['submit'])) {
                 ";
 
     $command = preg_replace('/\s+/', ' ', $command);
-    //echo $command . '<hr>';exit;
+    // exit($command);
 
     header('X-Accel-Buffering: no');
     ini_set('output_buffering', '0');
@@ -39,16 +39,20 @@ if (isset($_POST['submit'])) {
     // output
     $proc = popen($command, 'r');
 
-    echo '<style>body {background: #000; font-size: 13px; color:#44D544;}"></style>' . NL;
+    echo '<style>body {background: #f9f9fa; font-size: 13px; color:#000; line-height: 150%;}"></style>' . NL;
     echo '<pre>' . NL;
 
     while (!feof($proc)) {
-        echo fread($proc, 4096) . NL;
-        echo '<script>window.scrollTo(0, document.body.scrollHeight);</script>' . NL;
-        @flush();
+        $response = fixResponse(fread($proc, 4096));
+
+        if ($response) {
+            echo $response;
+            echo '<script>window.scrollTo(0, document.body.scrollHeight);</script>' . NL;
+            @flush();
+        }
     }
 
-    echo '<script>window.onload = function () {window.scrollTo(0, document.body.scrollHeight);}</script>' . NL;
+    echo '<script>setTimeout(function (){window.scrollTo(0, document.body.scrollHeight)}, 500)</script>' . NL;
     echo "--FINISHED--" . NL;
     echo '</pre>' . NL;
 }
@@ -74,4 +78,28 @@ function getAllFoldersWithCorrectedPaths($folders)
     }
 
     return $folders;
+}
+
+function fixResponse($response)
+{
+    // do not show ./W/E
+    $response = trim(rtrim(ltrim($response, '.EW'), '.EW'));
+
+    // remove un-necessary stuff
+    $response = preg_replace('/(DONE.+)/', '', $response);
+    $response = preg_replace('/(Changing into directory.+)/', '', $response);
+    $response = preg_replace('/(\[PHP =>.+)/', '', $response);
+    $response = preg_replace('/(\(0 errors.+)/', '', $response);
+    $response = preg_replace('/\r\n/', '', $response);
+
+    // some highlightings
+    $response = preg_replace('/(Creating file list.+)/', "$1<br>", $response);
+    $response = preg_replace('/(Processing.+)/', "<span style='color: blue;'>$1</span>", $response);
+    $response = preg_replace('/(FILE:.+)/', "<br><strong style='background: yellow; padding: 3px;'>$1</strong>", $response);
+    $response = preg_replace('/(ERROR(S)?)/', "<span style='color: red;'>$1</span>", $response);
+
+    // highlight errors if needed
+    $response = preg_replace('/(>> .+)/', "<span style='color: red;'>$1</span>", $response);
+
+    return trim($response);
 }
