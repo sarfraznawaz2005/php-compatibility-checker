@@ -90,16 +90,14 @@ function fixResponse($response)
     $response = preg_replace('/(Changing into directory.+)/', '', $response);
     $response = preg_replace('/(\[PHP =>.+)/', '', $response);
     $response = preg_replace('/(\(0 errors.+)/', '', $response);
+    $response = preg_replace('/(Creating file list.+)/', "$1<br>", $response);
     $response = preg_replace('/\r\n/', '', $response);
 
     // some highlightings
-    $response = preg_replace('/(Creating file list.+)/', "$1<br>", $response);
+    $response = preg_replace('/(>> .+)/', "<span style='color: red;'>$1</span>", $response);
     $response = preg_replace('/(Processing.+)/', "<span style='color: blue;'>$1</span>", $response);
     $response = preg_replace('/(FILE:.+)/', "<br><strong style='background: yellow; padding: 3px;'>$1</strong>", $response);
     $response = preg_replace('/(ERROR(S)?)/', "<span style='color: red;'>$1</span>", $response);
-
-    // highlight errors if needed
-    $response = preg_replace('/(>> .+)/', "<span style='color: red;'>$1</span>", $response);
 
     return trim($response);
 }
