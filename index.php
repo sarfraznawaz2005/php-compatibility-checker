@@ -8,8 +8,8 @@
 
     <link href="./favicon.ico" rel="icon">
 
-    <link href="assets/css/bootstrap/css/bootstrap.min.css" rel="stylesheet">
-    <link href="assets/css/style.css" rel="stylesheet">
+    <link href="./css/bootstrap.min.css" rel="stylesheet">
+    <link href="./css/style.css" rel="stylesheet">
 </head>
 
 <body>
@@ -47,9 +47,9 @@
 
                             <div class="form-group col-md-6 mt-3 mt-md-0">
                                 <label for="folders">
-                                    Folders to scan separated by space (Leave empty to scan entire PHP code)
+                                    Folders to scan separated by comma (Leave empty to scan entire PHP code)
                                 </label>
-                                <input type="text" class="form-control" name="folders" id="folders" value="app vendor">
+                                <input type="text" class="form-control" name="folders" id="folders">
                             </div>
                         </div>
                         <br>
@@ -113,8 +113,6 @@
     </section>
 
 </main>
-
-<script src="assets/js/main.js"></script>
 
 </body>
 </html>

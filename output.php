@@ -55,21 +55,22 @@ if (isset($_POST['submit'])) {
 
 function getAllFoldersWithCorrectedPaths($folders)
 {
-    // one folder back from root path
+    if ($folders) {
+		// one folder back from root path
+		//$rootPath = dirname($_SERVER['DOCUMENT_ROOT']) . DS;
+		// use above line instead of below if running from folder other than php checker eg hosting
+		$rootPath = '';
 
-    //$rootPath = dirname($_SERVER['DOCUMENT_ROOT']) . DS;
-    // use above line instead of below if running from folder other than php checker eg hosting
-    $rootPath = '';
+        $scanFolders = [];
+        $folderPaths = explode(',', $folders);
 
-    $scanFolders = [];
-    $folderPaths = explode(' ', $folders);
+        if (is_array($folderPaths)) {
+            foreach ($folderPaths as $folder) {
+                $scanFolders[] = $rootPath . trim($folder);
+            }
 
-    if (is_array($folderPaths)) {
-        foreach ($folderPaths as $folder) {
-            $scanFolders[] = $rootPath . $folder;
+            return implode(' ', $scanFolders);
         }
-
-        return implode(' ', $scanFolders);
     }
 
     return $folders;
