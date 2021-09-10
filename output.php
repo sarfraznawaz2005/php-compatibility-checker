@@ -7,12 +7,14 @@ if (isset($_POST['submit'])) {
     define('DS', DIRECTORY_SEPARATOR);
     define('NL', PHP_EOL);
 
-    $folders = getAllFoldersWithCorrectedPaths($_POST['folders'] ?: '.');
+    $root = $_POST['root'];
     $version = $_POST['testVersion'];
     $patterns = $_POST['patterns'];
     $listFiles = isset($_POST['list_files']);
     $showWarnings = isset($_POST['show_warnings']);
     $reportCode = isset($_POST['report_code']) ? '--report=code' : '';
+    $folders = getAllFoldersWithCorrectedPaths($root, $_POST['folders'] ?: '.');
+    $excludedSnifs = parseExcludedSniffs($_POST['excludedSnifs']);
 
     $args = '-ps' . ($listFiles ? 'v' : '') . ($showWarnings ? 'w' : 'n');
     $phpcs = '.' . DS . 'vendor' . DS . 'bin' . DS . 'phpcs';
@@ -20,16 +22,23 @@ if (isset($_POST['submit'])) {
 
     $command = "$phpcs $args $folders -d memory_limit=-1
                 $reportCode
-                --no-cache
-                --report-width=120
                 --extensions=php
+                --parallel=2
                 --standard=$phpCCStandardPath
                 --runtime-set testVersion $version
                 --ignore=$patterns
+                --no-cache
+                --no-colors
+                --report=full
+                --report-width=120
                 ";
 
+    if ($excludedSnifs) {
+        $command .= "--exclude=$excludedSnifs";
+    }
+
     $command = preg_replace('/\s+/', ' ', $command);
-    // exit($command);
+    //exit($command);
 
     header('X-Accel-Buffering: no');
     ini_set('output_buffering', '0');
@@ -57,16 +66,12 @@ if (isset($_POST['submit'])) {
     echo '</pre>' . NL;
 }
 
-function getAllFoldersWithCorrectedPaths($folders)
+function getAllFoldersWithCorrectedPaths($rootPath, $folders)
 {
     if ($folders) {
-		// one folder back from root path
-		//$rootPath = dirname($_SERVER['DOCUMENT_ROOT']) . DS;
-		// use above line instead of below if running from folder other than php checker eg hosting
-		$rootPath = '';
-
         $scanFolders = [];
         $folderPaths = explode(',', $folders);
+        $rootPath = substr($rootPath, -1) === '/' ? $rootPath : $rootPath . '/';
 
         if (is_array($folderPaths)) {
             foreach ($folderPaths as $folder) {
@@ -78,6 +83,22 @@ function getAllFoldersWithCorrectedPaths($folders)
     }
 
     return $folders;
+}
+
+function parseExcludedSniffs($sniffs)
+{
+    if ($sniffs) {
+        $sniffArray = explode("\n", $sniffs);
+
+        if (is_array($sniffArray)) {
+            $value = implode(',', $sniffArray);
+            $value = preg_replace('/\s+/', '', $value);
+
+            return trim(rtrim($value, ','));
+        }
+    }
+
+    return $sniffs;
 }
 
 function fixResponse($response)
