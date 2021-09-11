@@ -1,7 +1,5 @@
 <?php
 
-// TODO: Add Laravel specific standard, currently none found out there.
-
 require __DIR__ . '/vendor/autoload.php';
 
 if (isset($_POST['submit'])) {
