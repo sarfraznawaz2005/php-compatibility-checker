@@ -1,15 +1,15 @@
 {
-    "name": "sarfraznawaz2005/php-compatibility-checker",
-    "description": "PHP Compatibility Checker",
-    "license": "MIT",
-    "authors": [
-        {
-            "name": "Sarfraz Ahmed",
-            "email": "sarfraznawaz2005@gmail.com"
-        }
-    ],
-    "require": {
-        "squizlabs/php_codesniffer": "^3.6",
-        "phpcompatibility/php-compatibility": "^9.3"
+  "name": "sarfraznawaz2005/php-compatibility-checker",
+  "description": "PHP Compatibility Checker",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Sarfraz Ahmed",
+      "email": "sarfraznawaz2005@gmail.com"
     }
+  ],
+  "require-dev": {
+    "squizlabs/php_codesniffer": "*",
+    "phpcompatibility/phpcompatibility-all": "*"
+  }
 }

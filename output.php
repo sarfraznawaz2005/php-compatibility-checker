@@ -1,5 +1,7 @@
 <?php
 
+// TODO: Add Laravel specific standard, currently none found out there.
+
 require __DIR__ . '/vendor/autoload.php';
 
 if (isset($_POST['submit'])) {
@@ -7,24 +9,25 @@ if (isset($_POST['submit'])) {
     define('DS', DIRECTORY_SEPARATOR);
     define('NL', PHP_EOL);
 
-    $root = $_POST['root'];
+    $type = $_POST['type'];
     $version = $_POST['testVersion'];
-    $patterns = $_POST['patterns'];
-    $listFiles = isset($_POST['list_files']);
-    $showWarnings = isset($_POST['show_warnings']);
-    $reportCode = isset($_POST['report_code']) ? '--report=code' : '';
+    $root = $_POST['root'];
     $folders = getAllFoldersWithCorrectedPaths($root, $_POST['folders'] ?: '.');
+    $patterns = $_POST['patterns'];
     $excludedSnifs = parseExcludedSniffs($_POST['excludedSnifs']);
+    $listFiles = isset($_POST['list_files']);
+    $reportCode = isset($_POST['report_code']) ? '--report=code' : '';
+    $showWarnings = isset($_POST['show_warnings']);
 
     $args = '-ps' . ($listFiles ? 'v' : '') . ($showWarnings ? 'w' : 'n');
     $phpcs = '.' . DS . 'vendor' . DS . 'bin' . DS . 'phpcs';
-    $phpCCStandardPath = '.' . DS . 'vendor' . DS . 'phpcompatibility' . DS . 'php-compatibility' . DS . 'PHPCompatibility';
+    $standards = getStandards($type, $version);
 
     $command = "$phpcs $args $folders -d memory_limit=-1
                 $reportCode
                 --extensions=php
                 --parallel=2
-                --standard=$phpCCStandardPath
+                --standard=$standards
                 --runtime-set testVersion $version
                 --ignore=$patterns
                 --no-cache
@@ -38,7 +41,7 @@ if (isset($_POST['submit'])) {
     }
 
     $command = preg_replace('/\s+/', ' ', $command);
-    //exit($command);
+    //echo $command;
 
     header('X-Accel-Buffering: no');
     ini_set('output_buffering', '0');
@@ -64,6 +67,35 @@ if (isset($_POST['submit'])) {
     echo '<script>setTimeout(function (){window.scrollTo(0, document.body.scrollHeight)}, 500)</script>' . NL;
     echo "--FINISHED--" . NL;
     echo '</pre>' . NL;
+}
+
+function getStandards($type, $version)
+{
+    $path = '.' . DS . 'vendor' . DS;
+    $symfonyVersion = (int)str_replace('.', '', $version);
+
+    # order is important
+    $standards = [
+        'PHPCompatibility' => $path . 'phpcompatibility' . DS . 'php-compatibility' . DS . 'PHPCompatibility',
+        'PHPCompatibilitySymfonyPolyfill' => $path . 'phpcompatibility' . DS . 'phpcompatibility-symfony' . DS . 'PHPCompatibilitySymfonyPolyfillPHP',
+        'PHPCompatibilityPasswordCompat' => $path . 'phpcompatibility' . DS . 'phpcompatibility-passwordcompat' . DS . 'PHPCompatibilityPasswordCompat',
+        'PHPCompatibilityParagonieRandomCompat' => $path . 'phpcompatibility' . DS . 'phpcompatibility-paragonie' . DS . 'PHPCompatibilityParagonieRandomCompat',
+        'PHPCompatibilityParagonieSodiumCompat' => $path . 'phpcompatibility' . DS . 'phpcompatibility-paragonie' . DS . 'PHPCompatibilityParagonieSodiumCompat',
+        'PHPCompatibilityWP' => $path . 'phpcompatibility' . DS . 'phpcompatibility-wp' . DS . 'PHPCompatibilityWP',
+    ];
+
+    if ($type === 'general') {
+        unset($standards['PHPCompatibilityWP']);
+    }
+
+    if ($symfonyVersion > 80 && $symfonyVersion < 90) {
+        // might need to change when symfony has greather than PHP 8 pollyfills
+        $standards['PHPCompatibilitySymfonyPolyfill'] .= 80;
+    } else {
+        $standards['PHPCompatibilitySymfonyPolyfill'] .= $symfonyVersion;
+    }
+
+    return implode(',', $standards);
 }
 
 function getAllFoldersWithCorrectedPaths($rootPath, $folders)

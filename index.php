@@ -33,19 +33,20 @@
 
                         <div class="form-content">
                             <div class="row">
-                                <div class="form-group col-md-6 mt-3 mt-md-0">
-                                    <label for="root">Root Path (Adjust as needed)</label>
+
+                                <div class="form-group col-md-4 mt-3 mt-md-0">
+                                    <label for="type">Project Type</label>
                                     <span class="text-danger fw-bold fs-4">*</span>
-                                    <input type="text"
-                                           class="form-control"
-                                           name="root"
-                                           id="root"
-                                           value="<?= dirname($_SERVER['DOCUMENT_ROOT']) ?>/"
-                                           required
+                                    <select class="form-select shadow-none"
+                                            name="type"
+                                            id="type"
                                     >
+                                        <option value="general" selected>General</option>
+                                        <option value="wordpress">WordPress</option>
+                                    </select>
                                 </div>
 
-                                <div class="form-group col-md-6 mt-3 mt-md-0">
+                                <div class="form-group col-md-4 mt-3 mt-md-0">
                                     <label for="testVersion">Target PHP Version</label>
                                     <span class="text-danger fw-bold fs-4">*</span>
                                     <select class="form-select shadow-none"
@@ -63,6 +64,19 @@
                                         <option value="8.1">8.1</option>
                                     </select>
                                 </div>
+
+                                <div class="form-group col-md-4 mt-3 mt-md-0">
+                                    <label for="root">Root Path (Adjust as needed)</label>
+                                    <span class="text-danger fw-bold fs-4">*</span>
+                                    <input type="text"
+                                           class="form-control"
+                                           name="root"
+                                           id="root"
+                                           value="<?= dirname($_SERVER['DOCUMENT_ROOT']) ?>/"
+                                           required
+                                    >
+                                </div>
+
                             </div>
                             <br>
 

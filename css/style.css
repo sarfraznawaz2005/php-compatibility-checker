@@ -82,11 +82,10 @@ section {
 
 .form {
     width: 100%;
-    background-color: #fff;
     box-shadow: 0 3px 20px rgba(0, 0, 0, 0.25);
     background-image: radial-gradient(
         #fff,
-        #eee
+        #e8e8e8
     );
 }
 
