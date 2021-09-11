@@ -7,7 +7,7 @@ body {
     font-size: 14px;
     background-image: radial-gradient(
         #bfbebe,
-        #ddd
+        #eee
     );
 }
 
@@ -94,7 +94,7 @@ section {
 }
 
 .form * {
-    text-shadow: 0 0 10px #fff;
+    text-shadow: 0 1px 1px #ddd;
 }
 
 @media (max-width: 575px) {

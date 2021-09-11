@@ -53,6 +53,7 @@ if (isset($_POST['submit'])) {
 
     echo '<style>body {background: #f9f9fa; font-size: 13px; color:#000; line-height: 150%;}"></style>' . NL;
     echo '<pre>' . NL;
+    echo "<strong>--STARTED--</strong>" . NL . NL;
 
     while (!feof($proc)) {
         $response = fixResponse(fread($proc, 4096));
@@ -64,8 +65,8 @@ if (isset($_POST['submit'])) {
         }
     }
 
-    echo '<script>setTimeout(function (){window.scrollTo(0, document.body.scrollHeight)}, 500)</script>' . NL;
-    echo "--FINISHED--" . NL;
+    echo '<script>setTimeout(function (){window.scrollTo(0, document.body.scrollHeight)}, 1000)</script>' . NL;
+    echo "<strong>--FINISHED--</strong>" . NL;
     echo '</pre>' . NL;
 }
 
@@ -140,16 +141,15 @@ function fixResponse($response)
 
     // remove un-necessary stuff
     $response = preg_replace('/(DONE.+)/', '', $response);
-    $response = preg_replace('/(Changing into directory.+)/', '', $response);
+    $response = preg_replace('/Changing into directory (.+)/', "<br><strong>$1 :</strong>", $response);
     $response = preg_replace('/(\[PHP =>.+)/', '', $response);
     $response = preg_replace('/(\(0 errors.+)/', '', $response);
     $response = preg_replace('/(Creating file list.+)/', "$1<br>", $response);
-    $response = preg_replace('/\r\n/', '', $response);
 
     // some highlightings
     $response = preg_replace('/(>> .+)/', "<span style='color: red;'>$1</span>", $response);
-    $response = preg_replace('/(Processing.+)/', "<span style='color: blue;'>$1</span>", $response);
-    $response = preg_replace('/(FILE:.+)/', "<br><strong style='background: yellow; padding: 3px;'>$1</strong>", $response);
+    $response = preg_replace('/Processing (.+)/', "<span style='color: blue;'>$1</span>", $response);
+    $response = preg_replace('/(FILE:.+)/', "<br><strong style='background: #ffff59; padding: 3px;'>$1</strong>", $response);
     $response = preg_replace('/(ERROR(S)?)/', "<span style='color: red;'>$1</span>", $response);
 
     return trim($response);
