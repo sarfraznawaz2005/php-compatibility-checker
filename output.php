@@ -45,23 +45,27 @@ if (isset($_POST['submit'])) {
     ini_set('output_buffering', '0');
     ob_end_flush();
     ob_implicit_flush();
+    flush();
 
     // output
-    $proc = popen($command, 'r');
+    $process = popen($command, 'r');
 
     echo '<style>body {background: #f9f9fa; font-size: 13px; color:#000; line-height: 150%;}"></style>' . NL;
     echo '<pre>' . NL;
     echo "<strong>--STARTED--</strong>" . NL . NL;
 
-    while (!feof($proc)) {
-        $response = fixResponse(fread($proc, 4096));
+    if (is_resource($process)) {
+        while (!feof($process)) {
+            $response = fixResponse(fread($process, 4096));
 
-        if ($response) {
-            echo $response;
-            echo '<script>window.scrollTo(0, document.body.scrollHeight);</script>' . NL;
-            @flush();
+            if ($response) {
+                echo $response;
+                echo '<script>window.scrollTo(0, document.body.scrollHeight);</script>' . NL;
+            }
         }
     }
+
+    pclose($process);
 
     echo '<script>setTimeout(function (){window.scrollTo(0, document.body.scrollHeight)}, 1000)</script>' . NL;
     echo "<strong>--FINISHED--</strong>" . NL;
