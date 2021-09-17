@@ -4,6 +4,10 @@ require __DIR__ . '/vendor/autoload.php';
 
 if (isset($_POST['submit'])) {
 
+    ini_set('memory_limit', '-1');
+    ini_set('max_input_time', '-1');
+    ini_set('max_execution_time', '0');
+
     define('DS', DIRECTORY_SEPARATOR);
     define('NL', PHP_EOL);
 
@@ -41,13 +45,9 @@ if (isset($_POST['submit'])) {
     $command = preg_replace('/\s+/', ' ', $command);
     //echo $command;
 
-    header('X-Accel-Buffering: no');
-    ini_set('output_buffering', '0');
-    ob_end_flush();
-    ob_implicit_flush();
-    flush();
-
     // output
+    setupRealTimeResponse();
+
     $process = popen($command, 'r');
 
     echo '<style>body {background: #f9f9fa; font-size: 13px; color:#000; line-height: 150%;}"></style>' . NL;
@@ -62,17 +62,19 @@ if (isset($_POST['submit'])) {
                 echo $response;
                 echo '<script>window.scrollTo(0, document.body.scrollHeight);</script>' . NL;
             }
-        }
-    }
 
-    pclose($process);
+            @flush();
+        }
+
+        pclose($process);
+    }
 
     echo '<script>setTimeout(function (){window.scrollTo(0, document.body.scrollHeight)}, 1000)</script>' . NL;
     echo "<strong>--FINISHED--</strong>" . NL;
     echo '</pre>' . NL;
 }
 
-function getStandards($type, $version)
+function getStandards($type, $version): string
 {
     $path = '.' . DS . 'vendor' . DS;
     $symfonyVersion = (int)str_replace('.', '', $version);
@@ -136,7 +138,7 @@ function parseExcludedSniffs($sniffs)
     return $sniffs;
 }
 
-function fixResponse($response)
+function fixResponse($response): string
 {
     // do not show ./W/E
     $response = trim(rtrim(ltrim($response, '.EW'), '.EW'));
@@ -155,4 +157,24 @@ function fixResponse($response)
     $response = preg_replace('/(ERROR(S)?)/', "<span style='color: red;'>$1</span>", $response);
 
     return trim($response);
+}
+
+function setupRealTimeResponse(): void
+{
+    ini_set('output_buffering', 'off');
+    ini_set('zlib.output_compression', false);
+    ini_set('implicit_flush', true);
+    ob_implicit_flush();
+
+    // clear, and turn off output buffering
+    while (ob_get_level() > 0) {
+        $level = ob_get_level();
+        ob_end_clean();
+
+        if (ob_get_level() === $level) {
+            break;
+        }
+    }
+
+    flush();
 }
